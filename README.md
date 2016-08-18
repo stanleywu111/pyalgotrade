@@ -1,9 +1,7 @@
 PyAlgoTrade
 ===========
 
-[![version status](https://pypip.in/v/pyalgotrade/badge.png)](https://pypi.python.org/pypi/pyalgotrade)
-[![downloads](https://pypip.in/d/pyalgotrade/badge.png)](https://pypi.python.org/pypi/pyalgotrade)
-[![build status](https://travis-ci.org/gbeced/pyalgotrade.png?branch=master)](https://travis-ci.org/gbeced/pyalgotrade)
+[![Build Status](https://travis-ci.org/gbeced/pyalgotrade.png?branch=master)](https://travis-ci.org/gbeced/pyalgotrade)
 [![Coverage Status](https://coveralls.io/repos/gbeced/pyalgotrade/badge.svg?branch=master)](https://coveralls.io/r/gbeced/pyalgotrade?branch=master)
 
 
@@ -16,7 +14,7 @@ and **live trading** is now possible using:
 
  * [Bitstamp](https://www.bitstamp.net/) for Bitcoins
 
-To get started with PyAlgoTrade take a look at the [tutorial](http://gbeced.github.io/pyalgotrade/docs/v0.17/html/tutorial.html) and the [full documentation](http://gbeced.github.io/pyalgotrade/docs/v0.17/html/index.html).
+To get started with PyAlgoTrade take a look at the [tutorial](http://gbeced.github.io/pyalgotrade/docs/v0.18/html/tutorial.html) and the [full documentation](http://gbeced.github.io/pyalgotrade/docs/v0.18/html/index.html).
 
 Main Features
 -------------

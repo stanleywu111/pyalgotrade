@@ -5,7 +5,7 @@ RUN apt-get update
 
 RUN apt-get install -y build-essential
 RUN apt-get install -y python-setuptools python-dev
-RUN easy_install pip
+RUN apt-get install -y python-pip
 
 RUN apt-get install -y gfortran libopenblas-dev liblapack-dev
 RUN apt-get install -y pkg-config
@@ -34,4 +34,4 @@ RUN cd /tmp; \
 	rm -rf ta-lib
 RUN pip install TA-Lib
 
-RUN pip install pyalgotrade==0.17
+RUN pip install pyalgotrade==0.18
