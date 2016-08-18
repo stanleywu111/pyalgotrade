@@ -78,7 +78,7 @@ class RowParser(csvfeed.RowParser):
         low = float(csvRowDict["LOW"])
         close = float(csvRowDict["CLOSE"])
         volume = float(csvRowDict["VOLUME"])
-        #amt = float(csvRowDict["AMT"])
+        amt = float(csvRowDict["AMT"])
         #dealnum = str(csvRowDict['DEALNUM'])
         #pct_chg = float(csvRowDict['PCT_CHG'])
         #swing = float(csvRowDict['SWING'])
@@ -92,16 +92,18 @@ class RowParser(csvfeed.RowParser):
         if self.__sanitize:
             open_, high, low, close = common.sanitize_ohlc(open_, high, low, close)
 
-        # Process extra columns.
-        extra = {}
-        for k, v in csvRowDict.iteritems():
-            if k not in self.__columnNames:
-                extra[k] = csvutils.float_or_string(v)
+        ## Process extra columns.
+        #extra = {}
+        #for k, v in csvRowDict.iteritems():
+        #    if k not in self.__columnNames:
+        #        extra[k] = csvutils.float_or_string(v)
 
-        #return self.__barClass(dateTime, open_, high, low, close, volume, amt, \
+        return bar.BasicBar(dateTime, open_, high, low, close, volume, amt, self.__frequency)
+
+        #return bar.BasicBar(dateTime, open_, high, low, close, volume, amt, \
         #    dealnum, pct_chg, swing, vwap, adjfactor, turn, trade_status, susp_reason, maxupordown, self.__frequency)
 
-        return self.__barClass(dateTime, open_, high, low, close, volume, self.__frequency, extra = extra)
+        #return self.__barClass(dateTime, open_, high, low, close, volume, self.__frequency, extra = extra)
 
 
 class Feed(csvfeed.BarFeed):
@@ -135,10 +137,10 @@ class Feed(csvfeed.BarFeed):
 
         self.__timezone = timezone
         self.__sanitizeBars = False
-        self.__barClass = bar.BasicBar
+    #    self.__barClass = bar.BasicBar
 
-    def setBarClass(self, barClass):
-        self.__barClass = barClass
+    #def setBarClass(self, barClass):
+    #    self.__barClass = barClass
 
     def sanitizeBars(self, sanitize):
         self.__sanitizeBars = sanitize
@@ -164,7 +166,5 @@ class Feed(csvfeed.BarFeed):
         if timezone is None:
             timezone = self.__timezone
 
-        rowParser = RowParser(
-            self.getDailyBarTime(), self.getFrequency(), timezone, self.__sanitizeBars, self.__barClass
-        )
+        rowParser = RowParser(self.getDailyBarTime(), self.getFrequency(), timezone, self.__sanitizeBars)
         super(Feed, self).addBarsFromCSV(instrument, path, rowParser)
