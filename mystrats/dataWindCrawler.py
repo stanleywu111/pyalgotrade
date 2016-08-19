@@ -37,6 +37,11 @@ for i in range(0, len(unlistedStockList)):
 
 
 
+#get HS300Weight
+import pandas as pd
+
+
+
 
 
 
