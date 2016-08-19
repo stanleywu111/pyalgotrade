@@ -1,60 +1,29 @@
 from pyalgotrade import strategy
-from pyalgotrade import plotter
-from pyalgotrade.tools import yahoofinance
-from pyalgotrade.technical import bollinger
-from pyalgotrade.stratanalyzer import sharpe
 from pyalgotrade.barfeed import myfeed
 
+import os
 
-class BBands(strategy.BacktestingStrategy):
-    def __init__(self, feed, instrument, bBandsPeriod):
-        super(BBands, self).__init__(feed)
-        self.__instrument = instrument
-        self.__bbands = bollinger.BollingerBands(feed[instrument].getCloseDataSeries(), bBandsPeriod, 2)
 
-    def getBollingerBands(self):
-        return self.__bbands
+
+class MyStrategy(strategy.BacktestingStrategy):
+    def __init__(self, feed, *instruments):
+        super(MyStrategy, self).__init__(feed)
 
     def onBars(self, bars):
-        lower = self.__bbands.getLowerBand()[-1]
-        upper = self.__bbands.getUpperBand()[-1]
-        if lower is None:
-            return
-
-        shares = self.getBroker().getShares(self.__instrument)
-        bar = bars[self.__instrument]
-        if shares == 0 and bar.getClose() < lower:
-            sharesToBuy = int(self.getBroker().getCash(False) / bar.getClose())
-            self.marketOrder(self.__instrument, sharesToBuy)
-
-        elif shares > 0 and bar.getClose() > upper:
-            self.marketOrder(self.__instrument, -1*shares)
+        for inst in instruments:
+            bar = bars[inst]
+            self.info(bar.getClose())
 
 
-def main(plot):
-    instrument = "PingAn"
-    bBandsPeriod = 40
+# Load the yahoo feed from the CSV file
+instruments = ['000001', '600000', '000002']
 
-    # Download the bars.
-    feed = myfeed.Feed()
-    feed.addBarsFromCSV('PingAn', 'data/600016.csv')
+feed = myfeed.Feed()
 
-    strat = BBands(feed, instrument, bBandsPeriod)
-    sharpeRatioAnalyzer = sharpe.SharpeRatio()
-    strat.attachAnalyzer(sharpeRatioAnalyzer)
+for inst in instruments:
+    filename = inst +'.csv'
+    feed.addBarsFromCSV(inst, os.path.join(r'E:\Personal\pyalgotrade\data\dailybar', filename))
 
-    if plot:
-        plt = plotter.StrategyPlotter(strat, True, True, True)
-        plt.getInstrumentSubplot(instrument).addDataSeries("upper", strat.getBollingerBands().getUpperBand())
-        plt.getInstrumentSubplot(instrument).addDataSeries("middle", strat.getBollingerBands().getMiddleBand())
-        plt.getInstrumentSubplot(instrument).addDataSeries("lower", strat.getBollingerBands().getLowerBand())
-
-    strat.run()
-    print "Sharpe ratio: %.2f" % sharpeRatioAnalyzer.getSharpeRatio(0.05)
-
-    if plot:
-        plt.plot()
-
-
-if __name__ == "__main__":
-    main(True)
+# Evaluate the strategy with the feed's bars.
+myStrategy = MyStrategy(feed, instruments[0], instruments[1])
+myStrategy.run()
