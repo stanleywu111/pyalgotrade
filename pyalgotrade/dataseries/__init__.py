@@ -74,6 +74,10 @@ class DataSeries(object):
         """Returns a list of :class:`datetime.datetime` associated with each value."""
         raise NotImplementedError()
 
+    @abc.abstractmethod
+    def getPrice(self):
+        raise NotImplementedError()
+
 
 class SequenceDataSeries(DataSeries):
     """A DataSeries that holds values in a sequence in memory.
@@ -143,3 +147,6 @@ class SequenceDataSeries(DataSeries):
 
     def getDateTimes(self):
         return self.__dateTimes.data()
+
+    def getPrice(self):
+        return self.__values.data()
