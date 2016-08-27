@@ -15,6 +15,18 @@ def price2return(prices):
     returns = map(lambda (x, y): (y/x)-1, zip(prices[0:-1], prices[1:]))
     return returns
 
+def portOpt(ret,n):
+    cov = np.cov(ret)
+    weights = []
+    if np.isnan(cov).any() == False:
+        w = Variable(n)
+        risk = quad_form(w, cov)
+        prob = Problem(Minimize(risk),[sum_entries(w) == 1])
+        prob.solve()
+        for weight in w.value:
+            weights.append(float(weight[0]))
+    return weights
+
 
 class MyStrategy(strategy.BacktestingStrategy):
     def __init__(self, feed, instruments):
@@ -51,17 +63,8 @@ class MyStrategy(strategy.BacktestingStrategy):
 
         equity = self.getBroker().getEquity()
         data = [np.array(price2return(self.__priceDS[inst].getPrice())) for inst in self.__instruments]
-        cov = np.cov(data)
-        weights = []
-        if np.isnan(cov).any() == False:
-            w = Variable(len(self.__instruments))
-            print cov
-            risk = quad_form(w, cov)
-            prob = Problem(Minimize(risk),[sum_entries(w) == 1, w > 0])
-            prob.solve()
-            for weight in w.value:
-                weights.append(float(weight[0]))
-            print weights
+        weights = portOpt(data,len(self.__instruments))
+        if len(weights) > 0:
             for i in range(len(self.__instruments)):
                 pri = self.__priceDS[self.__instruments[i]].getPrice()[-1]
                 num = math.floor(equity*weights[i]/pri)
@@ -82,7 +85,7 @@ class MyStrategy(strategy.BacktestingStrategy):
             
 
 # Load the yahoo feed from the CSV file
-instruments = ['000001', '600000', '000002']
+instruments = ['000001', '600305', '000006']
 
 feed = myfeed.Feed()
 
