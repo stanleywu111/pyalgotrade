@@ -1,29 +1,40 @@
-from pyalgotrade import plotter
-from pyalgotrade.barfeed import myfeed
-from pyalgotrade.stratanalyzer import returns
-import sma_crossover
+import numpy as np
+np.random.seed(1)
+n = 10
+mu = np.abs(np.random.randn(n, 1))
+Sigma = np.random.randn(n, n)
+Sigma = Sigma.T.dot(Sigma)
 
-# Load the yahoo feed from the CSV file
-feed = myfeed.Feed()
-feed.addBarsFromCSV("PingAn", "data/000001.csv")
+from cvxpy import *
+w = Variable(n)
+gamma = Parameter(sign='positive')
+ret = mu.T*w 
+risk = quad_form(w, Sigma)
+prob = Problem(Maximize(ret - gamma*risk), 
+               [sum_entries(w) == 1, 
+                w >= 0])
 
-# Evaluate the strategy with the feed's bars.
-myStrategy = sma_crossover.SMACrossOver(feed, "PingAn", 20)
+SAMPLES = 100
+risk_data = np.zeros(SAMPLES)
+ret_data = np.zeros(SAMPLES)
+gamma_vals = np.logspace(-2, 3, num=SAMPLES)
+for i in range(SAMPLES):
+    gamma.value = gamma_vals[i]
+    prob.solve()
+    risk_data[i] = sqrt(risk).value
+    ret_data[i] = ret.value
 
-# Attach a returns analyzers to the strategy.
-returnsAnalyzer = returns.Returns()
-myStrategy.attachAnalyzer(returnsAnalyzer)
+import matplotlib.pyplot as plt
 
-# Attach the plotter to the strategy.
-plt = plotter.StrategyPlotter(myStrategy)
-# Include the SMA in the instrument's subplot to get it displayed along with the closing prices.
-plt.getInstrumentSubplot("orcl").addDataSeries("SMA", myStrategy.getSMA())
-# Plot the simple returns on each bar.
-plt.getOrCreateSubplot("returns").addDataSeries("Simple returns", returnsAnalyzer.getReturns())
-
-# Run the strategy.
-myStrategy.run()
-myStrategy.info("Final portfolio value: $%.2f" % myStrategy.getResult())
-
-# Plot the strategy.
-plt.plot()
+markers_on = [29, 40]
+fig = plt.figure()
+ax = fig.add_subplot(111)
+plt.plot(risk_data, ret_data, 'g-')
+for marker in markers_on:
+    plt.plot(risk_data[marker], ret_data[marker], 'bs')
+    ax.annotate(r"$\gamma = %.2f$" % gamma_vals[marker], xy=(risk_data[marker]+.08, ret_data[marker]-.03))
+for i in range(n):
+    plt.plot(sqrt(Sigma[i,i]).value, mu[i], 'ro')
+plt.xlabel('Standard deviation')
+plt.ylabel('Return')
+plt.show()

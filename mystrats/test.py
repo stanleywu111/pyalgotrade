@@ -4,9 +4,8 @@ from pyalgotrade.barfeed import myfeed
 import os
 
 
-
 class MyStrategy(strategy.BacktestingStrategy):
-    def __init__(self, feed, *instruments):
+    def __init__(self, feed, instruments):
         super(MyStrategy, self).__init__(feed)
 
     def onBars(self, bars):
@@ -25,5 +24,5 @@ for inst in instruments:
     feed.addBarsFromCSV(inst, os.path.join(r'E:\Personal\pyalgotrade\data\dailybar', filename))
 
 # Evaluate the strategy with the feed's bars.
-myStrategy = MyStrategy(feed, instruments[0], instruments[1])
+myStrategy = MyStrategy(feed, instruments)
 myStrategy.run()
