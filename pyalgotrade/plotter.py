@@ -26,6 +26,8 @@ from pyalgotrade import warninghelpers
 import matplotlib.pyplot as plt
 from matplotlib import ticker
 
+plt.style.use('ggplot')
+
 
 def get_last_value(dataSeries):
     ret = None
