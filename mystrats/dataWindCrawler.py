@@ -29,11 +29,11 @@ def wind2csv(sid, startDate = "2005-01-04", endDate = "2016-8-16"):
 
 for i in range(0, len(stockList)):
     wind2csv(stockList[i])
-    print i
+    print(i)
 
 for i in range(0, len(unlistedStockList)):
     wind2csv(unlistedStockList[i])
-    print i
+    print(i)
 
 
 

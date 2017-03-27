@@ -12,7 +12,7 @@ from pyalgotrade.technical import ma
 from cvxpy import *
 
 def price2return(prices):
-    returns = map(lambda (x, y): (y/x)-1, zip(prices[0:-1], prices[1:]))
+    returns = [(x_y[1]/x_y[0])-1 for x_y in zip(prices[0:-1], prices[1:])]
     return returns
 
 def portOpt(ret,n):
@@ -79,7 +79,7 @@ class MyStrategy(strategy.BacktestingStrategy):
 
         if self._shouldRebalance(currentDateTime):
             self.__rebalanceMonth = currentDateTime.month
-            print "REBALANCING {0}".format(currentDateTime)
+            print("REBALANCING {0}".format(currentDateTime))
             self._rebalance()
            
             

@@ -5,7 +5,7 @@
 # yahoo finance API (https://code.google.com/p/yahoo-finance-managed/wiki/CSVAPI)
 
 import csv
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 from collections import defaultdict
 import numpy
 from statsmodels.stats.correlation_tools import cov_nearest
@@ -20,7 +20,7 @@ def get_stock_quote(symbol):
 	close_prop = '&f=l1'
 	SUFFIX = '&e=.csv'
 	url = "%s%s%s%s" % (BASE_URL, ID, close_prop, SUFFIX)
-	price = float(urllib2.urlopen(url).read().strip())
+	price = float(urllib.request.urlopen(url).read().strip())
 	return price
 
 # Downloads the stock history for the given symbol,
@@ -47,7 +47,7 @@ def quote_history_dict(symbol, start, end, interval='m'):
 	response = _quote_history(symbol, start, end, interval)
 	dreader = csv.DictReader(response)
 	for row in dreader:
-		for key in row.iterkeys():
+		for key in row.keys():
 			history[key].insert(0, row[key])
 	return history
 
@@ -57,28 +57,28 @@ def _quote_history(symbol, start, end, interval):
 	sm, sd, sy = start.split('/')
 	em, ed, ey = end.split('/')
 	url = "%s%s&a=%d&b=%d&c=%d&d=%d&e=%d&f=%d&g=%s" % (BASE_URL, ID, (int(sm)-1), int(sd), int(sy), (int(em)-1), int(ed), int(ey), interval)
-	response = urllib2.urlopen(url)
+	response = urllib.request.urlopen(url)
 	return response
 
 def get_prices(symbol, start, end, interval='m'):
 	history = quote_history_dict(symbol, start, end, interval)
-	prices = map(lambda x: round(float(x),2), history['Close'])
+	prices = [round(float(x),2) for x in history['Close']]
 	prices[0] = round(float(history['Open'][0]),2)
 	return prices
 
 def get_returns(symbol, start, end, interval='m'):
 	history = quote_history_dict(symbol, start, end, interval)
-	prices = map(lambda x: round(float(x),2), history['Close'])
+	prices = [round(float(x),2) for x in history['Close']]
 	prices[0] = round(float(history['Open'][0]),2)
-	returns = map(lambda (x, y): (y/x)-1, zip(prices[0:-1], prices[1:]))
+	returns = [(x_y[1]/x_y[0])-1 for x_y in zip(prices[0:-1], prices[1:])]
 	return returns
 
 def get_yr_returns(symbol, start, end):
 	history = quote_history_dict(symbol, start, end, 'm')
-	prices = map(lambda x: round(float(x),2), history['Close'])
+	prices = [round(float(x),2) for x in history['Close']]
 	prices[0] = round(float(history['Open'][0]),2)
 	prices.insert(0, prices[0])
-	returns = map(lambda (x, y): (y/x)-1, zip(prices[0::12][:-1], prices[12::12]))
+	returns = [(x_y1[1]/x_y1[0])-1 for x_y1 in zip(prices[0::12][:-1], prices[12::12])]
 	return returns
 
 def avg_return(symbol, start, end, interval='m'):
@@ -144,7 +144,7 @@ start   = '1/1/2010'
 end     = '1/1/2014'
 n       = len(symbols)
 # average yearly return for each stock
-avg_ret = matrix(map(lambda s: avg_return(s, start, end, 'y'), symbols))
+avg_ret = matrix([avg_return(s, start, end, 'y') for s in symbols])
 # covariance of asset returns
 covs    = matrix(numpy.array(cov_matrix(symbols, start, end, 'y')))
 # minimum expected return threshold
@@ -153,4 +153,4 @@ r_min   = 0.10
 ### solve
 solution = optimize_portfolio(n, avg_ret, covs, r_min)
 y = solution['x']
-print sum(y)
+print(sum(y))
